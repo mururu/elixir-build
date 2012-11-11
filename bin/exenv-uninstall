@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+set -e
+
+# Provide exenv completions
+if [ "$1" = "--complete" ]; then
+  exec exenv versions --bare
+fi
+
+if [ -z "$EXENV_ROOT" ]; then
+  EXENV_ROOT="${HOME}/.exenv"
+fi
+
+unset FORCE
+if [ "$1" = "-f" ]; then
+  FORCE=true
+  shift
+fi
+
+DEFINITION="$1"
+case "$DEFINITION" in
+"" | -* )
+  { echo "usage: exenv uninstall [-f] VERSION"
+    echo
+    echo "   -f  Attempt to remove the specified version without prompting"
+    echo "       for confirmation. If the version does not exist, do not"
+    echo "       display an error message."
+    echo
+    echo "Installed versions:"
+    exenv versions --bare | sed 's/^/  /'
+    echo
+  } >&2
+  exit 1
+  ;;
+esac
+
+VERSION_NAME="${DEFINITION##*/}"
+PREFIX="${EXENV_ROOT}/versions/${VERSION_NAME}"
+
+if [ -z "$FORCE" ]; then
+  if [ ! -d "$PREFIX" ]; then
+    echo "exenv: version \`$VERSION_NAME' not installed" >&2
+    exit 1
+  fi
+
+  read -p "exenv: remove $PREFIX? "
+  case "$REPLY" in
+  y* | Y* ) ;;
+  * ) exit 1 ;;
+  esac
+fi
+
+if [ -d "$PREFIX" ]; then
+  rm -rf "$PREFIX"
+  exenv rehash
+fi

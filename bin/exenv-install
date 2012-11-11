@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+set -e
+[ -n "$EXENV_DEBUG" ] && set -x
+
+# Provide exenv completions
+if [ "$1" = "--complete" ]; then
+  exec elixir-build --definitions
+fi
+
+if [ -z "$EXENV_ROOT" ]; then
+  EXENV_ROOT="${HOME}/.exenv"
+fi
+
+# Load shared library functions
+eval "$(elixir-build --lib)"
+
+usage() {
+  { echo "usage: exenv install [-k|--keep] [-v|--verbose] VERSION"
+    echo "       exenv install [-k|--keep] [-v|--verbose] /path/to/definition"
+    echo "       exenv install -l|--list"
+    echo
+    echo "  -l/--list        List all available versions"
+    echo "  -k/--keep        Keep source tree in \$EXENV_BUILD_ROOT after installation"
+    echo "                   (defaults to ${EXENV_ROOT}/sources)"
+    echo "  -v/--verbose     Verbose mode: print compilation status to stdout"
+    echo
+  } >&2
+
+  [ -z "$1" ] || exit "$1"
+}
+
+unset KEEP
+unset VERBOSE
+
+parse_options "$@"
+for option in "${OPTIONS[@]}"; do
+  case "$option" in
+  "h" | "help" )
+    usage 0
+    ;;
+  "l" | "list" )
+    echo "Available versions:"
+    elixir-build --definitions | sed 's/^/  /'
+    exit
+    ;;
+  "k" | "keep" )
+    [ -n "${EXENV_BUILD_ROOT}" ] || EXENV_BUILD_ROOT="${EXENV_ROOT}/sources"
+    ;;
+  "v" | "verbose" )
+    VERBOSE="-v"
+    ;;
+  "version" )
+    exec elixir-build --version
+    ;;
+  * )
+    usage 1
+    ;;
+  esac
+done
+
+DEFINITION="${ARGUMENTS[0]}"
+[ -n "$DEFINITION" ] || usage 1
+
+for script in $(exenv-hooks install); do
+  source "$script"
+done
+
+VERSION_NAME="${DEFINITION##*/}"
+PREFIX="${EXENV_ROOT}/versions/${VERSION_NAME}"
+
+# If EXENV_BUILD_ROOT is set, then always pass keep options to elixir-build
+if [ -n "${EXENV_BUILD_ROOT}" ]; then
+  export ELIXIR_BUILD_BUILD_PATH="${EXENV_BUILD_ROOT}/${VERSION_NAME}"
+  KEEP="-k"
+fi
+
+elixir-build $KEEP $VERBOSE "$DEFINITION" "$PREFIX"
+exenv rehash

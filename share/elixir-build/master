@@ -1,1 +1,1 @@
-install_git "0.8.3" "https://github.com/elixir-lang/elixir.git" "master"
+install_git "0.9.0" "https://github.com/elixir-lang/elixir.git" "master"

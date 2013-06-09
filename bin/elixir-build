@@ -96,6 +96,10 @@ install_git() {
   install_package_using "git" 2 $*
 }
 
+install_git_sha1() {
+  install_package_using "git_sha1" 2 $*
+}
+
 install_package_using() {
   local package_type="$1"
   local package_type_nargs="$2"
@@ -153,6 +157,28 @@ fetch_git() {
 
   if type git &>/dev/null; then
     git clone --depth 1 --branch "$git_ref" "$git_url" "${package_name}" >&4 2>&1
+  else
+    echo "error: please install \`git\` and try again" >&2
+    exit 1
+  fi
+}
+
+fetch_git_sha1() {
+  local package_name="$1"
+  local git_url="$2"
+  local git_ref="$3"
+
+  echo "Cloning ${git_url}..." >&2
+
+  if type git &>/dev/null; then
+    git clone --branch master "$git_url" "${package_name}" >&4 2>&1
+    pushd "$package_name" >&4
+    if git checkout "$git_ref" >&4 2>&1; then
+      popd >&4
+    else
+      echo "error: unknown sha1 $git_ref"
+      exit 1
+    fi
   else
     echo "error: please install \`git\` and try again" >&2
     exit 1

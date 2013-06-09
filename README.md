@@ -86,6 +86,16 @@ Source code will be kept in a parallel directory tree
 `~/.exenv/sources` when using `--keep` with the `exenv install`
 command.
 
+### Install Elixir of specified revision (Advanced)
+
+You can install Elixir of specified revision by specifying the sha1.
+For example,
+
+```
+echo 'install_git_sha1 "your_version" "https://github.com/elixir-lang/elixir.git" "c80e52ee3"' > $ELIXIR_BUILD_HOME/share/elixir-build/your_version
+exenv install your_version
+```
+
 ## Version History
 
 #### 20111111

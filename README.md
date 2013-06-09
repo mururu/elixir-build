@@ -9,6 +9,10 @@ need precise control over Elixir version installation.
 
 elixir-build is Elixir verion of ruby-build. Thanks to @sstephenson!
 
+### Prerequisite
+
+Erlang, version R16B or later.
+
 ## Installation
 
 ### Installing as an exenv plugin (recommended)

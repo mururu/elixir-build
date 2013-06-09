@@ -90,7 +90,7 @@ Source code will be kept in a parallel directory tree
 `~/.exenv/sources` when using `--keep` with the `exenv install`
 command.
 
-### Install Elixir of specified revision (Advanced)
+### Installing Elixir of specified revision (Advanced)
 
 You can install Elixir of specified revision by specifying the sha1.
 For example,

@@ -98,7 +98,11 @@ exenv install your_version
 
 ## Version History
 
-#### 20111111
+#### 20130609
+
+ * Add install_git_sha1
+
+#### 20121120
 
  * fork [ruby-build](https://github.com/sstephenson/ruby-build)
 

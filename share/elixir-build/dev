@@ -1,0 +1,1 @@
+install_git_with_history "elixir-dev" "https://github.com/elixir-lang/elixir.git" "master"

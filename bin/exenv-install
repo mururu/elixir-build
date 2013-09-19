@@ -23,6 +23,7 @@ usage() {
     echo "  -k/--keep        Keep source tree in \$EXENV_BUILD_ROOT after installation"
     echo "                   (defaults to ${EXENV_ROOT}/sources)"
     echo "  -v/--verbose     Verbose mode: print compilation status to stdout"
+    echo "  -a/--add         Adds version with given sha into list of available versions"
     echo
   } >&2
 
@@ -41,6 +42,13 @@ for option in "${OPTIONS[@]}"; do
   "l" | "list" )
     echo "Available versions:"
     elixir-build --definitions | sed 's/^/  /'
+    exit
+    ;;
+  "a" | "add" )
+    version="${ARGUMENTS[0]}"
+    [ -z $version ] && usage 0
+    echo "Adding version: ${version}"
+    echo "install_git_sha1 \"${version}\" \"https://github.com/elixir-lang/elixir.git\" \"${version}\"" > "${ELIXIR_BUILD_HOME}/share/elixir-build/${version}"
     exit
     ;;
   "k" | "keep" )

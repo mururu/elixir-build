@@ -257,6 +257,7 @@ usage() {
   { version
     echo "usage: elixir-build [-k|--keep] [-v|--verbose] definition prefix"
     echo "       elixir-build --definitions"
+    echo "       elixir-build --add-definition VERSION"
   } >&2
 
   if [ -z "$1" ]; then
@@ -271,6 +272,11 @@ list_definitions() {
   } | sort
 }
 
+add_definition() {
+  local version="$1"
+  echo "Adding version: ${version}"
+  echo "install_git_sha1 \"${version}\" \"https://github.com/elixir-lang/elixir.git\" \"${version}\"" > "${ELIXIR_BUILD_ROOT}/share/elixir-build/${version}"
+}
 
 
 unset VERBOSE
@@ -284,15 +290,21 @@ for option in "${OPTIONS[@]}"; do
   "h" | "help" )
     usage without_exiting
     { echo
-      echo "  -k/--keep        Do not remove source tree after installation"
-      echo "  -v/--verbose     Verbose mode: print compilation status to stdout"
-      echo "  --definitions    List all built-in definitions"
+      echo "  -k/--keep                 Do not remove source tree after installation"
+      echo "  -v/--verbose              Verbose mode: print compilation status to stdout"
+      echo "  --definitions             List all built-in definitions"
+      echo "  --add-definition VERSION  Adds version with given sha into list of available versions"
       echo
     } >&2
     exit 0
     ;;
   "definitions" )
     list_definitions
+    exit 0
+    ;;
+  "add-definition" )
+    [ -z  "${ARGUMENTS[0]}" ] && usage
+    add_definition "${ARGUMENTS[0]}"
     exit 0
     ;;
   "k" | "keep" )

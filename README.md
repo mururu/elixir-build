@@ -102,6 +102,10 @@ exenv install v0.9.3-9-g7d22146
 
 ## Version History
 
+#### 20130921
+
+ * Add --add option (@khia)
+
 #### 20130609
 
  * Add install_git_sha1

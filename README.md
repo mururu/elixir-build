@@ -96,8 +96,8 @@ You can install Elixir of specified revision by specifying the sha1.
 For example,
 
 ```
-echo 'install_git_sha1 "your_version" "https://github.com/elixir-lang/elixir.git" "c80e52ee3"' > $ELIXIR_BUILD_HOME/share/elixir-build/your_version
-exenv install your_version
+exenv install --add v0.9.3-9-g7d22146
+exenv install v0.9.3-9-g7d22146
 ```
 
 ## Version History

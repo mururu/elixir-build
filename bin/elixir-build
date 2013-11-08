@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-ELIXIR_BUILD_VERSION="20130921"
+ELIXIR_BUILD_VERSION="20131108"
 
 set -E
 exec 3<&2 # preserve original stderr at fd 3

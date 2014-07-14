@@ -149,6 +149,12 @@ fetch_tarball() {
   echo "Downloading ${package_url}..." >&2
   { fetch_url "$package_url" > "${package_name}.tar.gz"
     tar xzvf "${package_name}.tar.gz"
+    # Handle the case where we fetch a tarball from GitHub, and
+    # it contains an innner package with the SHA1 of the release commit
+    if test -n "$(find "$BUILD_PATH" -maxdepth 1 -name 'elixir-lang-elixir-*' -print -quit)"; then
+      ls -la "$BUILD_PATH"
+      mv elixir-lang-elixir-* "$package_name"
+    fi
   } >&4 2>&1
 }
 
@@ -265,11 +271,41 @@ usage() {
   fi
 }
 
-list_definitions() {
+list_custom_definitions() {
   { for definition in "${ELIXIR_BUILD_ROOT}/share/elixir-build/"*; do
       echo "${definition##*/}"
     done
   } | sort
+}
+
+list_definitions() {
+  {
+    local items=()
+    for i in $(curl -s https://api.github.com/repos/elixir-lang/elixir/releases | ${ELIXIR_BUILD_ROOT}/bin/json | egrep '\[[0-9]+,"assets",[0-9]+,"browser_download_url"\]' | tr "\t" "\n"); do
+      items+=($i)
+    done
+
+    items_len=${#items[@]}
+    for ((i=1;i<=$items_len;i+=2)); do
+      local release_url=$(echo ${items[i]} | sed 's/\"//g')
+      echo "$(parse_release_version "$release_url")"
+    done
+  } | sort -r
+}
+
+parse_release_version() {
+  local release_url="$1"
+  echo "$(echo "$release_url" | sed 's/https\:\/\/github\.com\/elixir\-lang\/elixir\/releases\/download\/v//' | sed 's/\/Precompiled\.zip$//')"
+}
+
+is_defined() {
+  local version="$1"
+  for def in $(list_definitions); do
+    if [ "$def" == "$version" ]; then
+      return 0
+    fi
+  done
+  return 1
 }
 
 add_definition() {
@@ -300,6 +336,7 @@ for option in "${OPTIONS[@]}"; do
     ;;
   "definitions" )
     list_definitions
+    list_custom_definitions
     exit 0
     ;;
   "add-definition" )
@@ -320,6 +357,7 @@ for option in "${OPTIONS[@]}"; do
   esac
 done
 
+IS_REMOTE_DEFINITION=0
 DEFINITION_PATH="${ARGUMENTS[0]}"
 if [ -z "$DEFINITION_PATH" ]; then
   usage
@@ -328,8 +366,17 @@ elif [ ! -e "$DEFINITION_PATH" ]; then
   if [ -e "$BUILTIN_DEFINITION_PATH" ]; then
     DEFINITION_PATH="$BUILTIN_DEFINITION_PATH"
   else
-    echo "elixir-build: definition not found: ${DEFINITION_PATH}" >&2
-    exit 1
+    # Check if there is a release with this definition
+    is_defined $DEFINITION_PATH
+    case $? in
+      0)
+        IS_REMOTE_DEFINITION=1
+        ;;
+      *)
+        echo "elixir-build: definition not found: ${DEFINITION_PATH}" >&2
+        exit 1
+        ;;
+    esac
   fi
 fi
 
@@ -365,7 +412,13 @@ unset ELIXIROPT
 unset ELIXIRLIB
 
 trap build_failed ERR
-mkdir -p "$BUILD_PATH"
-source "$DEFINITION_PATH"
+if [ $IS_REMOTE_DEFINITION -eq 1 ]; then
+  mkdir -p "$BUILD_PATH"
+  DEFINITION_NAME="${DEFINITION_PATH##*/}"
+  install_package "elixir-${DEFINITION_NAME}" "https://api.github.com/repos/elixir-lang/elixir/tarball/v${DEFINITION_NAME}"
+else
+  mkdir -p "$BUILD_PATH"
+  source "$DEFINITION_PATH"
+fi
 [ -z "${KEEP_BUILD_PATH}" ] && rm -fr "$BUILD_PATH"
 trap - ERR

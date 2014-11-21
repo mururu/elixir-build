@@ -7,7 +7,7 @@ different versions of Elixir on UNIX-like systems.
 You can also use elixir-build without exenv in environments where you
 need precise control over Elixir version installation.
 
-elixir-build is Elixir verion of ruby-build. Thanks to @sstephenson!
+elixir-build is the Elixir version of ruby-build. Thanks to @sstephenson!
 
 ### Prerequisite
 

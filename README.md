@@ -1,3 +1,7 @@
+**This repository is archived**
+
+---
+
 # elixir-build
 
 elixir-build is an [exenv](https://github.com/mururu/exenv) plugin

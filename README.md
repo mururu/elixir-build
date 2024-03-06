@@ -100,8 +100,8 @@ You can install Elixir of specified revision by specifying the sha1.
 For example,
 
 ```
-exenv install --add v0.9.3-9-g7d22146
-exenv install v0.9.3-9-g7d22146
+exenv install --add g7d22146
+exenv install g7d22146
 ```
 
 ## Version History
